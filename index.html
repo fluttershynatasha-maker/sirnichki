@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Тюленчики і сірнічкі</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        body {
+            background: linear-gradient(135deg, #ffffff, #ff4c68, #ff9a3d);
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px 60px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #ff6f91;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.5rem;
+            letter-spacing: 1.5px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: 2px solid #ff6f91;
+            border-radius: 50px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ff4c68;
+            box-shadow: 0 0 8px rgba(255, 76, 104, 0.5);
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            color: white;
+            background-color: #ff6f91;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(255, 111, 145, 0.3);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff4c68;
+            box-shadow: 0 12px 20px rgba(255, 76, 104, 0.5);
+        }
+
+        #submittedList {
+            margin-top: 40px;
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 20px 30px;
+            box-sizing: border-box;
+        }
+
+        #submittedList h2 {
+            color: #ff6f91;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: 1.2px;
+            text-align: center;
+        }
+
+        #submittedList ul {
+            list-style-type: none;
+            padding-left: 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        #submittedList ul li {
+            background: #fde7ec;
+            margin-bottom: 10px;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-size: 1rem;
+            color: #ff4c68;
+            box-shadow: 0 4px 8px rgba(255, 76, 104, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-content {
+            flex-grow: 1;
+        }
+
+        .delete-btn {
+            margin-left: 15px;
+            border: none;
+            background: transparent;
+            color: #ff4c68;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Картинка в лівому нижньому куті */
+        .corner-image {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 200px;
+            height: auto;
+            z-index: 100;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тюленчики і сірнічкі</h1>
+        <input type="text" id="sizeInput" placeholder="Розмір сірничка..." />
+        <input type="text" id="tasteInput" placeholder="Смак сірничка..." />
+        <input type="text" id="colorInput" placeholder="Колір тюленчика..." />
+        <button onclick="submitInput()">Надіслати</button>
+    </div>
+
+    <div id="submittedList" style="display:none;">
+        <h2>Введені дані</h2>
+        <ul id="listItems"></ul>
+    </div>
+
+    <!-- Картинка внизу зліва -->
+    <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgiiTWNgHSzqrRRJv353lxljGFvfP6EHLnaQ&s"
+        alt="Картинка тюленчика"
+        class="corner-image"
+    />
+
+    <script>
+        function saveToLocalStorage(items) {
+            localStorage.setItem('submittedItems', JSON.stringify(items));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('submittedItems');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function renderList() {
+            const items = loadFromLocalStorage();
+            const list = document.getElementById('listItems');
+            const container = document.getElementById('submittedList');
+
+            list.innerHTML = '';
+
+            if (items.length === 0) {
+                container.style.display = 'none';
+                return;
+            } else {
+                container.style.display = 'block';
+            }
+
+            items.forEach((item, index) => {
+                const li = document.createElement('li');
+
+                const content = document.createElement('div');
+                content.className = 'item-content';
+                content.innerHTML = `
+                    <strong>Розмір:</strong> ${item.size}<br>
+                    <strong>Смак:</strong> ${item.taste}<br>
+                    <strong>Колір:</strong> ${item.color}
+                `;
+
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '✖';
+                delBtn.className = 'delete-btn';
+                delBtn.title = 'Видалити';
+                delBtn.onclick = function () {
+                    removeItem(index);
+                };
+
+                li.appendChild(content);
+                li.appendChild(delBtn);
+                list.appendChild(li);
+            });
+        }
+
+        function removeItem(index) {
+            const items = loadFromLocalStorage();
+            items.splice(index, 1);
+            saveToLocalStorage(items);
+            renderList();
+        }
+
+        function submitInput() {
+            const size = document.getElementById('sizeInput').value.trim();
+            const taste = document.getElementById('tasteInput').value.trim();
+            const color = document.getElementById('colorInput').value.trim();
+
+            if (!size || !taste || !color) {
+                alert('Будь ласка, заповни всі поля!');
+                return;
+            }
+
+            const items = loadFromLocalStorage();
+            items.push({ size, taste, color });
+            saveToLocalStorage(items);
+            renderList();
+
+            // Очистити поля
+            document.getElementById('sizeInput').value = '';
+            document.getElementById('tasteInput').value = '';
+            document.getElementById('colorInput').value = '';
+        }
+
+        window.onload = function () {
+            renderList();
+        };
+    </script>
+</body>
+</html>
