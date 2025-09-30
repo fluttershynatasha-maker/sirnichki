@@ -175,7 +175,6 @@
       const items = loadFromLocalStorage();
       const list = document.getElementById('listItems');
       const container = document.getElementById('submittedList');
-
       list.innerHTML = '';
 
       if (items.length === 0) {
@@ -200,9 +199,7 @@
         delBtn.textContent = '✖';
         delBtn.className = 'delete-btn';
         delBtn.title = 'Видалити';
-        delBtn.onclick = function () {
-          removeItem(index);
-        };
+        delBtn.onclick = () => removeItem(index);
 
         li.appendChild(content);
         li.appendChild(delBtn);
@@ -237,10 +234,10 @@
       document.getElementById('colorInput').value = '';
     }
 
-    // Перетягування картинки (мишкою + дотик)
+    // ===== DRAGGABLE IMAGE =====
     const image = document.getElementById('draggableImage');
     let isDragging = false;
-    let offsetX, offsetY;
+    let offsetX = 0, offsetY = 0;
 
     function saveImagePosition(x, y) {
       localStorage.setItem('imagePosition', JSON.stringify({ left: x, top: y }));
@@ -249,10 +246,10 @@
     function loadImagePosition() {
       const pos = JSON.parse(localStorage.getItem('imagePosition'));
       if (pos) {
+        image.style.position = 'fixed';
         image.style.left = pos.left + 'px';
         image.style.top = pos.top + 'px';
         image.style.bottom = 'auto';
-        image.style.position = 'fixed';
       }
     }
 
@@ -262,6 +259,7 @@
       offsetX = e.clientX - image.getBoundingClientRect().left;
       offsetY = e.clientY - image.getBoundingClientRect().top;
       image.style.transition = 'none';
+      image.style.position = 'fixed';
     });
 
     document.addEventListener('mousemove', (e) => {
@@ -279,17 +277,20 @@
       image.style.transition = '';
     });
 
-    // Дотик
+    // Дотики
     image.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
       isDragging = true;
       const touch = e.touches[0];
       offsetX = touch.clientX - image.getBoundingClientRect().left;
       offsetY = touch.clientY - image.getBoundingClientRect().top;
       image.style.transition = 'none';
+      image.style.position = 'fixed';
     });
 
     document.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
+      if (!isDragging || e.touches.length !== 1) return;
+      e.preventDefault(); // Заборонити прокрутку при дотику
       const touch = e.touches[0];
       const x = touch.clientX - offsetX;
       const y = touch.clientY - offsetY;
@@ -297,7 +298,7 @@
       image.style.top = y + 'px';
       image.style.bottom = 'auto';
       saveImagePosition(x, y);
-    });
+    }, { passive: false });
 
     document.addEventListener('touchend', () => {
       isDragging = false;
