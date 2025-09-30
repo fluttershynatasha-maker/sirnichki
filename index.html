@@ -126,7 +126,6 @@
             font-size: 1.2rem;
         }
 
-        /* Картинка в лівому нижньому куті */
         .corner-image {
             position: fixed;
             bottom: 10px;
@@ -136,6 +135,7 @@
             z-index: 100;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: move;
         }
     </style>
 </head>
@@ -153,14 +153,15 @@
         <ul id="listItems"></ul>
     </div>
 
-    <!-- Картинка внизу зліва -->
     <img
         src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgiiTWNgHSzqrRRJv353lxljGFvfP6EHLnaQ&s"
         alt="Картинка тюленчика"
         class="corner-image"
+        id="draggableImage"
     />
 
     <script>
+        // Збереження / завантаження введених даних
         function saveToLocalStorage(items) {
             localStorage.setItem('submittedItems', JSON.stringify(items));
         }
@@ -231,14 +232,53 @@
             saveToLocalStorage(items);
             renderList();
 
-            // Очистити поля
             document.getElementById('sizeInput').value = '';
             document.getElementById('tasteInput').value = '';
             document.getElementById('colorInput').value = '';
         }
 
+        // Збереження положення картинки
+        const image = document.getElementById('draggableImage');
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        // Завантажити позицію з localStorage
+        function loadImagePosition() {
+            const pos = JSON.parse(localStorage.getItem('imagePosition'));
+            if (pos) {
+                image.style.left = pos.left + 'px';
+                image.style.top = pos.top + 'px';
+                image.style.bottom = 'auto';
+            }
+        }
+
+        image.addEventListener('mousedown', function (e) {
+            isDragging = true;
+            offsetX = e.clientX - image.getBoundingClientRect().left;
+            offsetY = e.clientY - image.getBoundingClientRect().top;
+            image.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            image.style.left = x + 'px';
+            image.style.top = y + 'px';
+            image.style.bottom = 'auto';
+
+            // Зберегти нову позицію під час руху
+            localStorage.setItem('imagePosition', JSON.stringify({ left: x, top: y }));
+        });
+
+        document.addEventListener('mouseup', function () {
+            isDragging = false;
+            image.style.transition = '';
+        });
+
         window.onload = function () {
             renderList();
+            loadImagePosition();
         };
     </script>
 </body>
